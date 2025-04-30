@@ -22,11 +22,11 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t mini-book-app .
-    
+
     - name: Tag Docker image
       run: |
         docker tag mini-book-app:latest 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
-    
+
     - name: Push Docker image to Amazon ECR
       run: |
         docker push 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest

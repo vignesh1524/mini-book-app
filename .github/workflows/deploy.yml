@@ -1,36 +1,44 @@
-name: Deploy to EC2
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on push to the main branch
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
-    - name: Copy files to EC2
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
-        target: "~/mini-book-app"
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-    - name: SSH into EC2 and deploy
-      uses: appleboy/ssh-action@master
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build Docker image
+      run: |
+        docker build -t mini-book-app .
+    
+    - name: Tag Docker image
+      run: |
+        docker tag mini-book-app:latest 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+    
+    - name: Push Docker image to Amazon ECR
+      run: |
+        docker push 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+
+    - name: SSH into EC2 and pull the latest image
+      uses: appleboy/ssh-action@v0.1.5
       with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
+        host: ${{ secrets.EC2_IP }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
-          cd mini-book-app
-          docker build -t mini-book-app:latest .
-          docker stop mini-container || true
-          docker rm mini-container || true
-          docker run -d --name mini-container -p 80:5000 mini-book-app:latest
+          docker pull 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+          docker stop mini-book-app-container || true
+          docker rm mini-book-app-container || true
+          docker run -d --name mini-book-app-container -p 80:80 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest

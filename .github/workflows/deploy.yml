@@ -11,34 +11,34 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2  # Checkout the repository code
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v1  # Set up Docker Buildx for building images
 
     - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v1  # Log into AWS ECR
 
     - name: Build Docker image
       run: |
-        docker build -t mini-book-app .
+        docker build -t mini-book-app .  # Build the Docker image
 
     - name: Tag Docker image
       run: |
-        docker tag mini-book-app:latest 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+        docker tag mini-book-app:latest 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest  # Tag the image with your ECR repository URL
 
     - name: Push Docker image to Amazon ECR
       run: |
-        docker push 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+        docker push 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest  # Push the Docker image to ECR
 
     - name: SSH into EC2 and pull the latest image
-      uses: appleboy/ssh-action@v0.1.5
+      uses: appleboy/ssh-action@v0.1.5  # SSH action to execute commands on your EC2 instance
       with:
-        host: ${{ secrets.EC2_IP }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        host: ${{ secrets.EC2_IP }}  # EC2 public IP address stored as GitHub secret
+        username: ubuntu  # The username to SSH into EC2
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}  # EC2 SSH private key stored as GitHub secret
         script: |
-          docker pull 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
-          docker stop mini-book-app-container || true
-          docker rm mini-book-app-container || true
-          docker run -d --name mini-book-app-container -p 80:80 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+          docker pull 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest  # Pull the latest Docker image from ECR
+          docker stop mini-book-app-container || true  # Stop any existing container
+          docker rm mini-book-app-container || true  # Remove the old container
+          docker run -d --name mini-book-app-container -p 80:80 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest  # Run the new container

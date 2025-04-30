@@ -5,72 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Book App</title>
     <style>
-        /* Basic styles for the app */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ecf0f1;
             margin: 0;
             padding: 0;
         }
 
-        /* Header style */
-        h1 {
+        header {
+            background-color: #2c3e50;
+            padding: 20px;
+            color: white;
             text-align: center;
-            color: #2c3e50;
         }
 
-        /* Button styling */
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            color: #555;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
         button {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 5px;
-            margin-top: 20px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
             background-color: #2980b9;
         }
 
-        /* Container for the book list */
         ul {
             list-style-type: none;
             padding: 0;
         }
 
         li {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #ccc;
+            font-size: 18px;
+        }
+
+        li:last-child {
+            border-bottom: none;
         }
 
         a {
             text-decoration: none;
-            color: #3498db;
-        }
-
-        a:hover {
-            color: #2980b9;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to the Mini Book App!</h1>
-    <p>Browse and buy your favorite books online.</p>
-    
-    <!-- Add a button to navigate to the 'Add Book' page -->
-    <a href="{{ url_for('add') }}">
-        <button>Add a New Book</button>
-    </a>
+    <header>
+        <h1>📚 Mini Book App</h1>
+    </header>
 
-    <h2>Books List</h2>
-    <ul>
-        {% for book in books %}
-            <li>{{ book.title }} by {{ book.author }}</li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <p>Browse and buy your favorite books online.</p>
+
+        <div class="button-container">
+            <a href="{{ url_for('add') }}">
+                <button>Add a New Book</button>
+            </a>
+        </div>
+
+        <h2>Books List</h2>
+        <ul>
+            {% for book in books %}
+                <li>{{ book.title }} by {{ book.author }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>

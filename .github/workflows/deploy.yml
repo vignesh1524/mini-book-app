@@ -3,10 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to main
+  workflow_dispatch:  # Enable manual workflow trigger
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,13 +19,10 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: us-east-1
 
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
 
     - name: Build Docker image
       run: |
@@ -38,7 +36,7 @@ jobs:
       run: |
         docker push 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
 
-    - name: SSH into EC2 and update container
+    - name: SSH into EC2 and deploy
       uses: appleboy/ssh-action@v0.1.5
       with:
         host: ${{ secrets.EC2_IP }}

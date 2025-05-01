@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Book App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"> <!-- Icon Library -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -109,6 +110,63 @@
         a {
             text-decoration: none;
         }
+
+        /* Flashcards Styles */
+        .flash-cards {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+
+        .flash-card {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 30%;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .flash-card:hover {
+            transform: scale(1.05);
+        }
+
+        .flash-card i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* Icon Section Styles */
+        .icon-section {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+        }
+
+        .icon-box {
+            background-color: #ecf0f1;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 20%;
+        }
+
+        .icon-box i {
+            font-size: 40px;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .icon-box h3 {
+            color: #2c3e50;
+        }
+
+        .icon-box p {
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -117,24 +175,65 @@
     </header>
 
     <div class="container">
-        <p>Browse and buy your favorite books online.</p>
+        <p>Browse and buy your favorite books online. Explore new genres and add books to your collection!</p>
 
+        <!-- Flashcards Section -->
+        <div class="flash-cards">
+            <div class="flash-card">
+                <i class="fas fa-book"></i>
+                <h3>Book Recommendations</h3>
+                <p>Discover great books across multiple genres.</p>
+            </div>
+            <div class="flash-card">
+                <i class="fas fa-star"></i>
+                <h3>Ratings & Reviews</h3>
+                <p>Get recommendations based on ratings from fellow readers.</p>
+            </div>
+            <div class="flash-card">
+                <i class="fas fa-search"></i>
+                <h3>Search & Find</h3>
+                <p>Easily search books by title, author, or genre.</p>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
         <div class="search-bar">
             <input type="text" placeholder="Search books by title or author...">
         </div>
 
+        <!-- Add Book Button -->
         <div class="button-container">
             <a href="{{ url_for('add') }}">
                 <button>Add a New Book</button>
             </a>
         </div>
 
+        <!-- Categories -->
         <div class="categories">
             <span class="category-tag">Fiction</span>
             <span class="category-tag">Science</span>
             <span class="category-tag">History</span>
             <span class="category-tag">Romance</span>
             <span class="category-tag">Technology</span>
+        </div>
+
+        <!-- Icon Section -->
+        <div class="icon-section">
+            <div class="icon-box">
+                <i class="fas fa-bookmark"></i>
+                <h3>Bookmark</h3>
+                <p>Save your favorite books for later.</p>
+            </div>
+            <div class="icon-box">
+                <i class="fas fa-user"></i>
+                <h3>Profile</h3>
+                <p>Track your reading progress and activity.</p>
+            </div>
+            <div class="icon-box">
+                <i class="fas fa-credit-card"></i>
+                <h3>Purchases</h3>
+                <p>Buy books easily with secure payment methods.</p>
+            </div>
         </div>
 
         <h2>Books List</h2>

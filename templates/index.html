@@ -121,20 +121,27 @@
         .flash-card {
             background-color: #3498db;
             color: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 40px;
+            border-radius: 15px;
             width: 30%;
             text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 200px; /* Makes the cards taller */
         }
 
         .flash-card:hover {
             transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
         }
 
         .flash-card i {
-            font-size: 40px;
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .flash-card h3 {
+            font-size: 20px;
             margin-bottom: 10px;
         }
 
@@ -182,17 +189,17 @@
             <div class="flash-card">
                 <i class="fas fa-book"></i>
                 <h3>Book Recommendations</h3>
-                <p>Discover great books across multiple genres.</p>
+                <p>Discover great books across multiple genres, hand-picked for you.</p>
             </div>
             <div class="flash-card">
                 <i class="fas fa-star"></i>
                 <h3>Ratings & Reviews</h3>
-                <p>Get recommendations based on ratings from fellow readers.</p>
+                <p>Get recommendations based on ratings from fellow readers. Share your thoughts!</p>
             </div>
             <div class="flash-card">
                 <i class="fas fa-search"></i>
                 <h3>Search & Find</h3>
-                <p>Easily search books by title, author, or genre.</p>
+                <p>Find books by title, author, or genre with our easy-to-use search tool.</p>
             </div>
         </div>
 

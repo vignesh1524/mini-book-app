@@ -3,8 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger on push to main
-  workflow_dispatch:  # Enable manual workflow trigger
+      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -36,15 +36,13 @@ jobs:
       run: |
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
 
-    - name: Get EC2 Instance ID by Name (No Tag Filter)
+    - name: Get EC2 Instance ID
       id: get_instance_id
       run: |
-        # Fetch the instance ID by filtering with Name, assuming a single instance for simplicity
         instance_id=$(aws ec2 describe-instances \
           --query 'Reservations[0].Instances[0].InstanceId' \
           --output text)
 
-        # Check if the instance_id is None or empty
         if [ "$instance_id" == "None" ] || [ -z "$instance_id" ]; then
           echo "No EC2 instance found."
           exit 1
@@ -52,31 +50,36 @@ jobs:
         echo "::set-output name=instance_id::$instance_id"
         echo "EC2 Instance ID: $instance_id"
 
-    - name: Check if EC2 instance is running
+    - name: Check EC2 instance status
       id: instance_status
       run: |
-        instance_state=$(aws ec2 describe-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} --query 'Reservations[0].Instances[0].State.Name' --output text)
+        instance_state=$(aws ec2 describe-instances \
+          --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} \
+          --query 'Reservations[0].Instances[0].State.Name' \
+          --output text)
         echo "Instance state: $instance_state"
         echo "::set-output name=status::$instance_state"
-      
-    - name: Start EC2 instance (if stopped)
+
+    - name: Start EC2 instance if stopped
       if: steps.instance_status.outputs.status == 'stopped'
       run: |
         aws ec2 start-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }}
         aws ec2 wait instance-running --instance-ids ${{ steps.get_instance_id.outputs.instance_id }}
         echo "Instance started."
 
-    - name: Get public IP of EC2 instance
+    - name: Get EC2 Public IP
       id: get_ip
       run: |
-        public_ip=$(aws ec2 describe-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
-        
-        # Check if public IP is available
+        public_ip=$(aws ec2 describe-instances \
+          --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} \
+          --query 'Reservations[0].Instances[0].PublicIpAddress' \
+          --output text)
+
         if [ "$public_ip" == "None" ] || [ -z "$public_ip" ]; then
-          echo "No public IP found for the instance."
+          echo "No public IP found."
           exit 1
         fi
-        
+
         echo "::set-output name=public_ip::$public_ip"
         echo "EC2 Public IP: $public_ip"
 
@@ -87,7 +90,15 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
+          echo "Checking for running container..."
+          if docker ps -q --filter "name=mini-book-app-container" | grep -q .; then
+            echo "Stopping and removing existing container..."
+            docker stop mini-book-app-container
+            docker rm mini-book-app-container
+          fi
+
+          echo "Pulling new image..."
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
-          docker stop mini-book-app-container || true
-          docker rm mini-book-app-container || true
+
+          echo "Running new container..."
           docker run -d --name mini-book-app-container -p 80:80 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest

@@ -3,8 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main  # Trigger on push to main
+  workflow_dispatch:  # Enable manual workflow trigger
 
 jobs:
   build-and-deploy:
@@ -90,15 +90,17 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
-          echo "Checking for running container..."
+          echo "Checking for existing container..."
+
+          # Stop and remove the old container if it's running
           if docker ps -q --filter "name=mini-book-app-container" | grep -q .; then
             echo "Stopping and removing existing container..."
             docker stop mini-book-app-container
             docker rm mini-book-app-container
           fi
 
-          echo "Pulling new image..."
+          echo "Pulling latest image from ECR..."
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
 
-          echo "Running new container..."
+          echo "Running the new container..."
           docker run -d --name mini-book-app-container -p 80:80 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest

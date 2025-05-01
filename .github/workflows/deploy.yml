@@ -40,6 +40,7 @@ jobs:
       id: get_instance_id
       run: |
         instance_id=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=mini-book-app-instance" \
           --query 'Reservations[0].Instances[0].InstanceId' \
           --output text)
 
@@ -47,8 +48,8 @@ jobs:
           echo "No EC2 instance found."
           exit 1
         fi
-        echo "::set-output name=instance_id::$instance_id"
-        echo "EC2 Instance ID: $instance_id"
+
+        echo "instance_id=$instance_id" >> $GITHUB_OUTPUT
 
     - name: Check EC2 instance status
       id: instance_status
@@ -57,8 +58,9 @@ jobs:
           --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} \
           --query 'Reservations[0].Instances[0].State.Name' \
           --output text)
+
         echo "Instance state: $instance_state"
-        echo "::set-output name=status::$instance_state"
+        echo "status=$instance_state" >> $GITHUB_OUTPUT
 
     - name: Start EC2 instance if stopped
       if: steps.instance_status.outputs.status == 'stopped'
@@ -80,8 +82,7 @@ jobs:
           exit 1
         fi
 
-        echo "::set-output name=public_ip::$public_ip"
-        echo "EC2 Public IP: $public_ip"
+        echo "public_ip=$public_ip" >> $GITHUB_OUTPUT
 
     - name: SSH into EC2 and deploy
       uses: appleboy/ssh-action@v0.1.5
@@ -92,7 +93,6 @@ jobs:
         script: |
           echo "Checking for existing container..."
 
-          # Stop and remove the old container if it's running
           if docker ps -q --filter "name=mini-book-app-container" | grep -q .; then
             echo "Stopping and removing existing container..."
             docker stop mini-book-app-container

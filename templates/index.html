@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Book App</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"> <!-- Icon Library -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -111,69 +110,52 @@
             text-decoration: none;
         }
 
-        /* Flashcards Styles */
-        .flash-cards {
-            display: flex;
-            justify-content: space-between;
-            margin: 30px 0;
-        }
-
-        .flash-card {
-            background-color: #3498db;
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            width: 30%;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            min-height: 200px; /* Makes the cards taller */
-        }
-
-        .flash-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .flash-card i {
-            font-size: 50px;
-            margin-bottom: 15px;
-        }
-
-        .flash-card h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        /* Icon Section Styles */
-        .icon-section {
+        /* Flashcard Styling */
+        .flashcards {
             display: flex;
             justify-content: space-around;
             margin: 40px 0;
         }
 
-        .icon-box {
-            background-color: #ecf0f1;
+        .flashcard {
+            background-color: #3498db;
+            color: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 20%;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
-        .icon-box i {
-            font-size: 40px;
-            color: #3498db;
-            margin-bottom: 10px;
+        .flashcard:hover {
+            transform: scale(1.05);
         }
 
-        .icon-box h3 {
-            color: #2c3e50;
+        .flashcard:nth-child(1) {
+            background-color: #e74c3c; /* Red */
         }
 
-        .icon-box p {
-            color: #555;
+        .flashcard:nth-child(2) {
+            background-color: #f39c12; /* Yellow */
         }
+
+        .flashcard:nth-child(3) {
+            background-color: #2ecc71; /* Green */
+        }
+
+        .flashcard:nth-child(4) {
+            background-color: #9b59b6; /* Purple */
+        }
+
+        .flashcard:nth-child(5) {
+            background-color: #1abc9c; /* Teal */
+        }
+
     </style>
 </head>
 <body>
@@ -182,65 +164,43 @@
     </header>
 
     <div class="container">
-        <p>Browse and buy your favorite books online. Explore new genres and add books to your collection!</p>
+        <p>Browse and buy your favorite books online.</p>
 
         <!-- Flashcards Section -->
-        <div class="flash-cards">
-            <div class="flash-card">
-                <i class="fas fa-book"></i>
-                <h3>Book Recommendations</h3>
-                <p>Discover great books across multiple genres, hand-picked for you.</p>
+        <div class="flashcards">
+            <div class="flashcard">
+                <span>Best Sellers</span>
             </div>
-            <div class="flash-card">
-                <i class="fas fa-star"></i>
-                <h3>Ratings & Reviews</h3>
-                <p>Get recommendations based on ratings from fellow readers. Share your thoughts!</p>
+            <div class="flashcard">
+                <span>New Releases</span>
             </div>
-            <div class="flash-card">
-                <i class="fas fa-search"></i>
-                <h3>Search & Find</h3>
-                <p>Find books by title, author, or genre with our easy-to-use search tool.</p>
+            <div class="flashcard">
+                <span>Discounted Books</span>
+            </div>
+            <div class="flashcard">
+                <span>Staff Picks</span>
+            </div>
+            <div class="flashcard">
+                <span>Genres</span>
             </div>
         </div>
 
-        <!-- Search Bar -->
         <div class="search-bar">
             <input type="text" placeholder="Search books by title or author...">
         </div>
 
-        <!-- Add Book Button -->
         <div class="button-container">
             <a href="{{ url_for('add') }}">
                 <button>Add a New Book</button>
             </a>
         </div>
 
-        <!-- Categories -->
         <div class="categories">
             <span class="category-tag">Fiction</span>
             <span class="category-tag">Science</span>
             <span class="category-tag">History</span>
             <span class="category-tag">Romance</span>
             <span class="category-tag">Technology</span>
-        </div>
-
-        <!-- Icon Section -->
-        <div class="icon-section">
-            <div class="icon-box">
-                <i class="fas fa-bookmark"></i>
-                <h3>Bookmark</h3>
-                <p>Save your favorite books for later.</p>
-            </div>
-            <div class="icon-box">
-                <i class="fas fa-user"></i>
-                <h3>Profile</h3>
-                <p>Track your reading progress and activity.</p>
-            </div>
-            <div class="icon-box">
-                <i class="fas fa-credit-card"></i>
-                <h3>Purchases</h3>
-                <p>Buy books easily with secure payment methods.</p>
-            </div>
         </div>
 
         <h2>Books List</h2>

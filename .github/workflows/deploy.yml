@@ -30,20 +30,51 @@ jobs:
 
     - name: Tag Docker image
       run: |
-        docker tag mini-book-app:latest 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+        docker tag mini-book-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
 
     - name: Push Docker image to Amazon ECR
       run: |
-        docker push 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+
+    - name: Get EC2 Instance ID by Tag
+      id: get_instance_id
+      run: |
+        instance_id=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=MiniBookApp" \
+          --query 'Reservations[0].Instances[0].InstanceId' \
+          --output text)
+        echo "::set-output name=instance_id::$instance_id"
+        echo "EC2 Instance ID: $instance_id"
+
+    - name: Check if EC2 instance is running
+      id: instance_status
+      run: |
+        instance_state=$(aws ec2 describe-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} --query 'Reservations[0].Instances[0].State.Name' --output text)
+        echo "Instance state: $instance_state"
+        echo "::set-output name=status::$instance_state"
+      
+    - name: Start EC2 instance (if stopped)
+      if: steps.instance_status.outputs.status == 'stopped'
+      run: |
+        aws ec2 start-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }}
+        aws ec2 wait instance-running --instance-ids ${{ steps.get_instance_id.outputs.instance_id }}
+        echo "Instance started."
+
+    - name: Get public IP of EC2 instance
+      id: get_ip
+      run: |
+        public_ip=$(aws ec2 describe-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+        echo "::set-output name=public_ip::$public_ip"
+        echo "EC2 Public IP: $public_ip"
 
     - name: SSH into EC2 and deploy
       uses: appleboy/ssh-action@v0.1.5
       with:
-        host: ${{ secrets.EC2_IP }}
+        host: ${{ steps.get_ip.outputs.public_ip }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
-          docker pull 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
           docker stop mini-book-app-container || true
           docker rm mini-book-app-container || true
-          docker run -d --name mini-book-app-container -p 80:80 529088254675.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
+          docker run -d --name mini-book-app-container -p 80:80 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest

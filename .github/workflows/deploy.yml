@@ -40,7 +40,6 @@ jobs:
       id: get_instance_id
       run: |
         instance_id=$(aws ec2 describe-instances \
-          --filters "Name=tag:Name,Values=mini-book-app-instance" \
           --query 'Reservations[0].Instances[0].InstanceId' \
           --output text)
 
@@ -48,7 +47,6 @@ jobs:
           echo "No EC2 instance found."
           exit 1
         fi
-
         echo "instance_id=$instance_id" >> $GITHUB_OUTPUT
 
     - name: Check EC2 instance status
@@ -58,8 +56,6 @@ jobs:
           --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} \
           --query 'Reservations[0].Instances[0].State.Name' \
           --output text)
-
-        echo "Instance state: $instance_state"
         echo "status=$instance_state" >> $GITHUB_OUTPUT
 
     - name: Start EC2 instance if stopped
@@ -90,13 +86,14 @@ jobs:
         host: ${{ steps.get_ip.outputs.public_ip }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        port: 22
         script: |
           echo "Checking for existing container..."
-
-          if docker ps -q --filter "name=mini-book-app-container" | grep -q .; then
+          container_id=$(docker ps -a -q --filter "name=mini-book-app-container")
+          if [ -n "$container_id" ]; then
             echo "Stopping and removing existing container..."
-            docker stop mini-book-app-container
-            docker rm mini-book-app-container
+            docker stop $container_id || true
+            docker rm $container_id || true
           fi
 
           echo "Pulling latest image from ECR..."

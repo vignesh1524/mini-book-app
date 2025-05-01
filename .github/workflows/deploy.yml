@@ -36,31 +36,25 @@ jobs:
       run: |
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
 
-    - name: Get EC2 Instance ID by Tag
+    - name: Get EC2 Instance ID by Name (No Tag Filter)
       id: get_instance_id
       run: |
+        # Fetch the instance ID by filtering with Name, assuming a single instance for simplicity
         instance_id=$(aws ec2 describe-instances \
-          --filters "Name=tag:Name,Values=MiniBookApp" \
           --query 'Reservations[0].Instances[0].InstanceId' \
           --output text)
-        
+
         # Check if the instance_id is None or empty
         if [ "$instance_id" == "None" ] || [ -z "$instance_id" ]; then
-          echo "No EC2 instance found with the given tag."
+          echo "No EC2 instance found."
           exit 1
         fi
-
         echo "::set-output name=instance_id::$instance_id"
         echo "EC2 Instance ID: $instance_id"
 
     - name: Check if EC2 instance is running
       id: instance_status
       run: |
-        if [ "${{ steps.get_instance_id.outputs.instance_id }}" == "None" ]; then
-          echo "EC2 instance ID is invalid. Aborting deployment."
-          exit 1
-        fi
-
         instance_state=$(aws ec2 describe-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} --query 'Reservations[0].Instances[0].State.Name' --output text)
         echo "Instance state: $instance_state"
         echo "::set-output name=status::$instance_state"
@@ -77,12 +71,12 @@ jobs:
       run: |
         public_ip=$(aws ec2 describe-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
         
-        # Check if the public IP is returned as None
+        # Check if public IP is available
         if [ "$public_ip" == "None" ] || [ -z "$public_ip" ]; then
-          echo "Unable to retrieve public IP for EC2 instance."
+          echo "No public IP found for the instance."
           exit 1
         fi
-
+        
         echo "::set-output name=public_ip::$public_ip"
         echo "EC2 Public IP: $public_ip"
 

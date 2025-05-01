@@ -19,6 +19,25 @@
             text-align: center;
         }
 
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #3498db;
+        }
+
         .container {
             max-width: 800px;
             margin: 40px auto;
@@ -109,81 +128,22 @@
         a {
             text-decoration: none;
         }
-
-        /* Flashcard Styling */
-        .flashcards {
-            display: flex;
-            justify-content: space-around;
-            margin: 40px 0;
-        }
-
-        .flashcard {
-            background-color: #3498db;
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            width: 200px;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-
-        .flashcard:hover {
-            transform: scale(1.05);
-        }
-
-        .flashcard:nth-child(1) {
-            background-color: #e74c3c; /* Red */
-        }
-
-        .flashcard:nth-child(2) {
-            background-color: #f39c12; /* Yellow */
-        }
-
-        .flashcard:nth-child(3) {
-            background-color: #2ecc71; /* Green */
-        }
-
-        .flashcard:nth-child(4) {
-            background-color: #9b59b6; /* Purple */
-        }
-
-        .flashcard:nth-child(5) {
-            background-color: #1abc9c; /* Teal */
-        }
-
     </style>
 </head>
 <body>
     <header>
         <h1>📚 Mini Book App</h1>
+        <nav class="navbar">
+            <a href="#">Home</a>
+            <a href="#">Contact Us</a>
+            <a href="#">About Us</a>
+            <a href="#">Services</a>
+            <a href="#">Books</a>
+        </nav>
     </header>
 
     <div class="container">
         <p>Browse and buy your favorite books online.</p>
-
-        <!-- Flashcards Section -->
-        <div class="flashcards">
-            <div class="flashcard">
-                <span>Best Sellers</span>
-            </div>
-            <div class="flashcard">
-                <span>New Releases</span>
-            </div>
-            <div class="flashcard">
-                <span>Discounted Books</span>
-            </div>
-            <div class="flashcard">
-                <span>Staff Picks</span>
-            </div>
-            <div class="flashcard">
-                <span>Genres</span>
-            </div>
-        </div>
 
         <div class="search-bar">
             <input type="text" placeholder="Search books by title or author...">

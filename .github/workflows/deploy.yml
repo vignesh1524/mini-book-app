@@ -3,8 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main  # Trigger on push to main
+  workflow_dispatch:  # Enable manual workflow trigger
 
 jobs:
   build-and-deploy:
@@ -24,21 +24,17 @@ jobs:
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build Docker image (no cache)
+    - name: Build Docker image
       run: |
-        docker build --no-cache -t mini-book-app .
+        docker build -t mini-book-app .
 
     - name: Tag Docker image
       run: |
         docker tag mini-book-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
-        # Optional: Tag with Git SHA
-        # docker tag mini-book-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:${{ github.sha }}
 
     - name: Push Docker image to Amazon ECR
       run: |
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
-        # Optional: docker push with Git SHA tag
-        # docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:${{ github.sha }}
 
     - name: Get EC2 Instance ID
       id: get_instance_id
@@ -46,6 +42,11 @@ jobs:
         instance_id=$(aws ec2 describe-instances \
           --query 'Reservations[0].Instances[0].InstanceId' \
           --output text)
+
+        if [ "$instance_id" == "None" ] || [ -z "$instance_id" ]; then
+          echo "No EC2 instance found."
+          exit 1
+        fi
         echo "instance_id=$instance_id" >> $GITHUB_OUTPUT
 
     - name: Check EC2 instance status
@@ -62,6 +63,7 @@ jobs:
       run: |
         aws ec2 start-instances --instance-ids ${{ steps.get_instance_id.outputs.instance_id }}
         aws ec2 wait instance-running --instance-ids ${{ steps.get_instance_id.outputs.instance_id }}
+        echo "Instance started."
 
     - name: Get EC2 Public IP
       id: get_ip
@@ -70,6 +72,12 @@ jobs:
           --instance-ids ${{ steps.get_instance_id.outputs.instance_id }} \
           --query 'Reservations[0].Instances[0].PublicIpAddress' \
           --output text)
+
+        if [ "$public_ip" == "None" ] || [ -z "$public_ip" ]; then
+          echo "No public IP found."
+          exit 1
+        fi
+
         echo "public_ip=$public_ip" >> $GITHUB_OUTPUT
 
     - name: SSH into EC2 and deploy
@@ -90,6 +98,9 @@ jobs:
 
           echo "Removing old image..."
           docker rmi -f ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest || true
+
+          echo "Logging in to ECR..."
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 
           echo "Pulling latest image from ECR..."
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/mini-book-app:latest
